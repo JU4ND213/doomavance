@@ -1,7 +1,8 @@
 import 'package:flame/components.dart';
+import 'package:flame/collisions.dart';
 import 'package:flutter/services.dart';
 
-class Player extends SpriteComponent with KeyboardHandler {
+class Player extends SpriteComponent with KeyboardHandler, CollisionCallbacks {
   int life = 3;
   double speed = 200;
 
@@ -14,6 +15,9 @@ class Player extends SpriteComponent with KeyboardHandler {
 
   @override
   Future<void> onLoad() async {
+    // Agregamos el hitbox para detectar colisiones
+    add(RectangleHitbox());
+
     // La ruta debe coincidir exactamente con pubspec.yaml
     sprite = await Sprite.load('mi_jugador.png');
   }

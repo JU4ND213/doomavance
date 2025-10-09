@@ -1,6 +1,8 @@
+// pages/game_page.dart
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import '../game/doom_avance_game.dart';
+import 'game_over_page.dart';
 
 class GamePage extends StatelessWidget {
   const GamePage({super.key});
@@ -9,10 +11,10 @@ class GamePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final game = DoomAvanceGame(
       onGameOver: (score) {
-        Navigator.pushReplacementNamed(
+        // Navegar a GameOverPage pasando score directamente
+        Navigator.pushReplacement(
           context,
-          "/gameover",
-          arguments: {"score": score},
+          MaterialPageRoute(builder: (_) => GameOverPage(score: score)),
         );
       },
     );
@@ -20,7 +22,6 @@ class GamePage extends StatelessWidget {
     return Scaffold(
       body: GestureDetector(
         onPanUpdate: (details) {
-          // Solo aumentamos la posición del jugador según el dedo
           game.player.position += Vector2(details.delta.dx, details.delta.dy);
         },
         child: GameWidget(game: game),
