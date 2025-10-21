@@ -3,13 +3,19 @@ import 'package:flame/collisions.dart';
 import 'package:flutter/services.dart';
 import 'projectile.dart';
 import 'package:flame/game.dart';
+import 'package:sensors_plus/sensors_plus.dart'; // Para usar acelerómetro
+import 'dart:async'; // Para manejar StreamSubscription
 
 class Player extends SpriteComponent with KeyboardHandler, CollisionCallbacks {
   int life = 3;
   double speed = 200;
-  double shootCooldown = 0.25; // seconds
+  double shootCooldown = 0.25; // segundos
   double _timeSinceLastShot = 0.0;
   bool doubleShip = false;
+
+  // Variables para movimiento con acelerómetro
+  StreamSubscription? _accelSub;
+  double _tiltX = 0.0;
 
   Player() : super(size: Vector2(50, 50), anchor: Anchor.center);
 
@@ -19,22 +25,38 @@ class Player extends SpriteComponent with KeyboardHandler, CollisionCallbacks {
 
   @override
   Future<void> onLoad() async {
-    // Agregamos el hitbox para detectar colisiones
+    // Hitbox para colisiones
     add(RectangleHitbox());
 
-    // La ruta debe coincidir exactamente con pubspec.yaml
+    // Cargar sprite del jugador
     sprite = await Sprite.load('mi_jugador.png');
-    // place player centered horizontally, and near bottom with a margin
+
+    // Posicionar jugador en el centro inferior de la pantalla
     final g = findGame();
     if (g is FlameGame) {
       position = Vector2(g.size.x / 2, g.size.y - 80);
     }
+
+    // Escuchar el acelerómetro (API actualizada)
+    _accelSub = accelerometerEventStream().listen((event) {
+      _tiltX = event.x; // inclinación lateral
+    });
   }
 
   @override
   void update(double dt) {
     super.update(dt);
     _timeSinceLastShot += dt;
+
+    // Movimiento con inclinación del celular
+    final g = findGame();
+    if (g is FlameGame) {
+      double move = -_tiltX * 150 * dt; // Ajusta sensibilidad con el valor 150
+      position.x += move;
+
+      // Evita que el jugador se salga de la pantalla
+      position.x = position.x.clamp(size.x / 2, g.size.x - size.x / 2);
+    }
   }
 
   @override
@@ -47,12 +69,10 @@ class Player extends SpriteComponent with KeyboardHandler, CollisionCallbacks {
     if (keysPressed.contains(LogicalKeyboardKey.arrowRight)) dir.x = 1;
 
     if (dir != Vector2.zero()) {
-      // Use game's delta approximation: try to get the game's dt via parent update is not available here,
-      // so use a safe step based on 60fps for input steps; major movement happens in update loop when integrating velocity.
       position += dir.normalized() * speed * 0.016;
     }
 
-    // Shoot when space is pressed
+    // Disparar con la barra espaciadora
     if (keysPressed.contains(LogicalKeyboardKey.space)) {
       _tryShoot();
     }
@@ -66,10 +86,9 @@ class Player extends SpriteComponent with KeyboardHandler, CollisionCallbacks {
 
     final g = findGame();
     if (g is FlameGame) {
-      // Spawn projectile a bit above the player and clamp X so projectile is visible
-      final leftX = (position.x - 12).clamp(0.0 + 4.0, g.size.x - 4.0);
-      final rightX = (position.x + 12).clamp(0.0 + 4.0, g.size.x - 4.0);
-      final centerX = position.x.clamp(0.0 + 4.0, g.size.x - 4.0);
+      final leftX = (position.x - 12).clamp(4.0, g.size.x - 4.0);
+      final rightX = (position.x + 12).clamp(4.0, g.size.x - 4.0);
+      final centerX = position.x.clamp(4.0, g.size.x - 4.0);
 
       if (doubleShip) {
         final left = Vector2(leftX, position.y - size.y / 2 - 8);
@@ -83,9 +102,8 @@ class Player extends SpriteComponent with KeyboardHandler, CollisionCallbacks {
     }
   }
 
-  /// Public shoot method so the game or input handlers can trigger a shot.
+  /// Método público para disparar (sin teclado)
   void shoot() {
-    // Reuse _tryShoot logic but bypass keyboard check
     if (_timeSinceLastShot < shootCooldown) return;
     _timeSinceLastShot = 0.0;
 
@@ -101,5 +119,12 @@ class Player extends SpriteComponent with KeyboardHandler, CollisionCallbacks {
         g.add(Projectile(position: projPos));
       }
     }
+  }
+
+  // Cancelar el stream del acelerómetro al eliminar el jugador
+  @override
+  void onRemove() {
+    _accelSub?.cancel();
+    super.onRemove();
   }
 }
