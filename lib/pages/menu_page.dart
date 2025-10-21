@@ -77,7 +77,7 @@ class MenuPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.4),
+                            color: const Color(0x66000000),
                             blurRadius: 10,
                             offset: const Offset(4, 4),
                           ),

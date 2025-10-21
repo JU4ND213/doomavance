@@ -11,18 +11,30 @@ class GamePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final game = DoomAvanceGame(
       onGameOver: (score) {
-        // Navegar a GameOverPage pasando score directamente
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => GameOverPage(score: score)),
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => GameOverPage(score: score)),
+          );
+        });
+      },
+      onMessage: (msg) {
+        // show a SnackBar from the page context
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
+        });
       },
     );
 
     return Scaffold(
       body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onPanUpdate: (details) {
-          game.player.position += Vector2(details.delta.dx, details.delta.dy);
+          // usar un método del juego para aplicar el movimiento y convertir a coordenadas del mundo si hace falta
+          game.movePlayerBy(Vector2(details.delta.dx, details.delta.dy));
         },
         child: GameWidget(game: game),
       ),
