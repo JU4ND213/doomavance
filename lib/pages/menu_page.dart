@@ -36,15 +36,15 @@ class MenuPage extends StatelessWidget {
                     builder: (context, value, child) =>
                         Opacity(opacity: value, child: child),
                     child: Text(
-                      "⚡ Doom Avance ⚡",
+                      "Doom",
                       style: TextStyle(
                         fontSize: 42,
                         fontWeight: FontWeight.bold,
-                        color: Colors.lightGreenAccent,
+                        color: const Color.fromARGB(255, 45, 85, 0),
                         shadows: [
                           Shadow(
                             blurRadius: 12,
-                            color: Colors.greenAccent.shade400,
+                            color: const Color.fromARGB(255, 6, 68, 38),
                             offset: const Offset(0, 0),
                           ),
                           const Shadow(

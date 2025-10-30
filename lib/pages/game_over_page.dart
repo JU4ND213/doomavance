@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'menu_page.dart';
 
+/// Página que muestra la pantalla de fin de juego.
+/// Incluye animaciones, puntaje final y opciones de reinicio o compartir.
 class GameOverPage extends StatelessWidget {
   final int score;
 
@@ -20,86 +22,110 @@ class GameOverPage extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 600),
               child: Card(
-                color: const Color(0xFF0B3D0B),
-                elevation: 16,
+                color: const Color(0xFF0E3B0E),
+                elevation: 20,
+                // Reemplazo: withOpacity -> withValues(alpha: ...)
+                shadowColor: Colors.greenAccent.withValues(alpha: 0.4),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(28.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.emoji_events,
-                        size: 68,
-                        color: Color(0xFFFFD600),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'GAME OVER',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: Colors.lightGreenAccent,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
+                      // 🏆 Ícono principal con animación sutil
+                      TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.8, end: 1.0),
+                        duration: const Duration(milliseconds: 800),
+                        curve: Curves.elasticOut,
+                        builder: (context, scale, _) => Transform.scale(
+                          scale: scale,
+                          child: const Icon(
+                            Icons.emoji_events,
+                            size: 80,
+                            color: Color(0xFFFFD600),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+
+                      const SizedBox(height: 16),
+
+                      // 🕹️ Título principal
                       Text(
-                        '¡Buen intento!',
-                        style: theme.textTheme.bodyLarge?.copyWith(
+                        'GAME OVER',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: Colors.lightGreenAccent,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // 💬 Subtítulo
+                      Text(
+                        '¡Buen intento, guerrero!',
+                        style: theme.textTheme.titleMedium?.copyWith(
                           color: Colors.white70,
                         ),
                       ),
-                      const SizedBox(height: 22),
 
-                      // Animated score counter
+                      const SizedBox(height: 28),
+
+                      // 🔢 Puntaje animado
                       TweenAnimationBuilder<int>(
                         tween: IntTween(begin: 0, end: score),
-                        duration: const Duration(milliseconds: 900),
+                        duration: const Duration(milliseconds: 1000),
                         builder: (context, value, _) => Text(
                           value.toString(),
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 48,
+                            fontSize: 54,
                             fontWeight: FontWeight.bold,
                             shadows: [
                               Shadow(
-                                blurRadius: 6,
-                                color: Colors.black45,
-                                offset: Offset(2, 2),
+                                blurRadius: 8,
+                                color: Colors.black54,
+                                offset: Offset(3, 3),
                               ),
                             ],
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 6),
+
                       const Text(
                         'Puntaje final',
                         style: TextStyle(color: Colors.white70),
                       ),
 
-                      const SizedBox(height: 26),
+                      const SizedBox(height: 30),
 
-                      // Action buttons
+                      // 🎮 Botones de acción principales
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Expanded(
                             child: ElevatedButton.icon(
-                              icon: const Icon(Icons.replay),
-                              label: const Text('Jugar de nuevo'),
+                              icon: const Icon(Icons.replay, size: 20),
+                              label: const Text(
+                                'Jugar de nuevo',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF2E6B0F),
+                                foregroundColor: Colors.white,
+                                elevation: 6,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
                               onPressed: () {
-                                // Navigate back to menu which should handle starting a new game
                                 Navigator.of(context).pushAndRemoveUntil(
                                   MaterialPageRoute(
                                     builder: (_) => const MenuPage(),
@@ -110,28 +136,33 @@ class GameOverPage extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 12),
+                          // 📤 Botón compartir
                           IconButton(
                             tooltip: 'Compartir puntaje',
                             style: IconButton.styleFrom(
                               backgroundColor: const Color(0xFF3C8D0D),
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.all(14),
+                              padding: const EdgeInsets.all(16),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            icon: const Icon(Icons.share),
+                            icon: const Icon(Icons.share, size: 26),
                             onPressed: () async {
                               final messenger = ScaffoldMessenger.of(context);
                               await Clipboard.setData(
                                 ClipboardData(
-                                  text: 'Mi puntaje en Doom: $score',
+                                  text:
+                                      '🎮 Mi puntaje en Doom fue $score puntos. ¡Desafíame si te atreves!',
                                 ),
                               );
                               messenger.showSnackBar(
                                 const SnackBar(
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: Colors.green,
                                   content: Text(
-                                    'Puntaje copiado al portapapeles',
+                                    'Puntaje copiado al portapapeles ✅',
+                                    style: TextStyle(color: Colors.white),
                                   ),
                                 ),
                               );
@@ -140,7 +171,9 @@ class GameOverPage extends StatelessWidget {
                         ],
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 20),
+
+                      // 🔙 Volver al menú
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).pushAndRemoveUntil(
@@ -149,8 +182,11 @@ class GameOverPage extends StatelessWidget {
                           );
                         },
                         child: const Text(
-                          'Volver al menú',
-                          style: TextStyle(color: Colors.white70),
+                          'Volver al menú principal',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                     ],

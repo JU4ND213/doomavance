@@ -24,7 +24,7 @@ flutter:
 
   assets:
     - assets/images/mi_jugador.png
-    - assets/images/enemy.png
+    - assets/images/enemy.gif
     - assets/images/doom_background.png
 
 

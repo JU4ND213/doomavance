@@ -33,7 +33,7 @@ class Enemy extends SpriteComponent with CollisionCallbacks {
     final g = findGame();
     if (g is FlameGame) {
       try {
-        final img = await g.images.load('enemy.png');
+        final img = await g.images.load('enemy.gif');
         sprite = Sprite(img);
       } catch (_) {}
     }

@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
     final colorScheme = ColorScheme.fromSeed(seedColor: seed);
 
     return MaterialApp(
-      title: 'Doom Avance',
+      title: 'Doom',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: colorScheme,
